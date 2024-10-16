@@ -1,7 +1,9 @@
-import Image from "next/image";
+import SignUp from "./signup/page";
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
-   <h1>Hello World</h1>
+    <SignUp />
   );
-}
+};
+
+export default Home;
