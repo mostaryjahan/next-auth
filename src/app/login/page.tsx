@@ -1,30 +1,60 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 
-const login = () => {
 
+const Login = () => {
   const [auth, setAuth] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState<string | null>(null); // State to handle error messages
+  const router = useRouter(); // Initialize useRouter
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(auth, "ok ok");
+
+    try {
+      const response = await fetch("/api/auth/login", { // Replace with your actual login API endpoint
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(auth),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get the error message
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const data = await response.json();
+      console.log("Login successful:", data);
+        // Redirect to the home page
+        router.push("/"); // Redirect to the home page ("/")
+
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
   return (
     <div className="w-full max-w-md mx-auto mt-10 p-8 space-y-3 rounded-xl dark:bg-gray-50 border-black border-2 dark:text-gray-800">
       <h1 className="text-2xl font-bold text-center">Login</h1>
-      <form action="" className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && <p className="text-red-500 text-center">{error}</p>} {/* Display error message */}
         <div className="space-y-1 text-sm">
-          <label htmlFor="username" className="block dark:text-gray-600">
+          <label htmlFor="email" className="block dark:text-gray-600">
             Email
           </label>
           <input
-            type="text"
+            type="email"
             name="email"
             placeholder="Email"
+            required
             onChange={(e) => setAuth({ ...auth, email: e.target.value })}
             className="w-full px-4 py-3 rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800 focus:dark:border-violet-600"
           />
@@ -37,20 +67,18 @@ const login = () => {
             type="password"
             name="password"
             placeholder="Password"
+            required
             onChange={(e) => setAuth({ ...auth, password: e.target.value })}
             className="w-full px-4 py-3 rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800 focus:dark:border-violet-600"
           />
-         
         </div>
-        <button onClick={handleSubmit} className="block w-full p-3 text-center rounded-sm dark:text-gray-50 dark:bg-violet-600">
+        <button type="submit" className="block w-full p-3 text-center rounded-sm dark:text-gray-50 dark:bg-violet-600">
           Login
         </button>
       </form>
       <div className="flex items-center pt-4 space-x-1">
         <div className="flex-1 h-px sm:w-16 dark:bg-gray-300"></div>
-        <p className="px-3 text-sm dark:text-gray-600">
-          Login with social accounts
-        </p>
+        <p className="px-3 text-sm dark:text-gray-600">Login with social accounts</p>
         <div className="flex-1 h-px sm:w-16 dark:bg-gray-300"></div>
       </div>
       <div className="flex justify-center space-x-4">
@@ -75,4 +103,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;
